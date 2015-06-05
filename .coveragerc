@@ -3,7 +3,7 @@ include =
     sifr/*
 omit =
     /*/sifr/_version*
-    /*/sifr/backports
+    /*/sifr/backports/*
 
 [report]
 exclude_lines =

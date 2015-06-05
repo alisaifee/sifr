@@ -1,11 +1,11 @@
-.. |travis-ci| image:: https://secure.travis-ci.org/alisaifee/sifr.png?branch=master
+.. |travis-ci| image:: https://img.shields.io/travis/alisaifee/sifr/master.svg?style=flat-square
     :target: https://travis-ci.org/#!/alisaifee/sifr?branch=master
-.. |coveralls| image:: https://coveralls.io/repos/alisaifee/sifr/badge.png?branch=master
+.. |coveralls| image:: https://img.shields.io/coveralls/alisaifee/sifr/master.svg?style=flat-square
     :target: https://coveralls.io/r/alisaifee/sifr?branch=master
-.. |pypi| image:: https://pypip.in/v/sifr/badge.png
-    :target: https://crate.io/packages/sifr/
-.. |license| image:: https://pypip.in/license/sifr/badge.png
-    :target: https://pypi.python.org/pypi/sifr/
+.. |pypi| image:: https://img.shields.io/pypi/v/sifr.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/sifr
+.. |license| image:: https://img.shields.io/pypi/l/sifr.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/sifr
 
 *************
 sifr

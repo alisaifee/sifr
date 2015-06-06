@@ -1,3 +1,4 @@
 six>=1.4.1
-redis
-hyperloglog
+redis>=2.10.3
+HLL>=0.99
+hyperloglog>=0.0.9

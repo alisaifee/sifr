@@ -3,6 +3,7 @@ import threading
 import hyperloglog
 import six
 import time
+from sifr.hll import get_hll
 
 try:
     from collections import Counter
@@ -54,13 +55,13 @@ class HLLCounter(Counter):
         self.counter.pop(key, None)
 
     def add(self, key, identifier):
-        self.counter.setdefault(key, hyperloglog.HyperLogLog(0.01))
+        self.counter.setdefault(key, get_hll()())
         self.counter[key].add(identifier)
 
     def get(self, key):
         if not key in self.counter:
             return 0
-        return int(len(self.counter[key]))
+        return self.counter[key].count()
 
 
 class MemoryStorage(Storage):

@@ -19,7 +19,7 @@ class Span(object):
         else:
             self.expiry = expiry
         self.at = at
-        self._key = ":".join(keys)
+        self._key = ":".join([str(k) for k in keys])
 
     @property
     def key(self):

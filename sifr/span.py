@@ -40,7 +40,7 @@ class Span(object):
 
 
 class Minute(Span):
-    fmt = "%Y-%m-%d %H:%M"
+    fmt = "%Y-%m-%d_%H:%M"
     duration = 60
 
     @property
@@ -59,7 +59,7 @@ class Minute(Span):
 
 
 class Hour(Span):
-    fmt = "%Y-%m-%d %H"
+    fmt = "%Y-%m-%d_%H"
     duration = 60 * 60
 
     @property

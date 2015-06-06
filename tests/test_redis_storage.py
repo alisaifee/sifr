@@ -30,8 +30,8 @@ class RedisStorageTests(unittest.TestCase):
     def test_tracker_minute(self):
         span = Minute(datetime.datetime.now(), ["minute_span"])
         storage = RedisStorage(self.redis)
-        storage.track(span, "1", 3)
-        storage.track(span, "1", 3)
-        storage.track(span, "2", 3)
-        storage.track(span, "3", 3)
+        storage.track(span, "1")
+        storage.track(span, "1")
+        storage.track(span, "2")
+        storage.track(span, "3")
         self.assertEqual(storage.enumerate(span), set(["1", "2", "3"]))

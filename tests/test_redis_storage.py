@@ -35,4 +35,4 @@ class RedisStorageTests(unittest.TestCase):
             storage.track(span, "1", 3)
             storage.track(span, "2", 3)
             storage.track(span, "3", 3)
-            self.assertEqual(storage.enumerate(span), {"1", "2", "3"})
+            self.assertEqual(storage.enumerate(span), set(["1", "2", "3"]))

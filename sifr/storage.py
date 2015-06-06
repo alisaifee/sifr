@@ -101,7 +101,7 @@ class MemoryStorage(Storage):
 
     def track_multi(self, spans, identifier):
         for span in spans:
-            self.track_multi(span)
+            self.track(span, identifier)
 
     def incr(self, span, amount=1):
         self.get(span)

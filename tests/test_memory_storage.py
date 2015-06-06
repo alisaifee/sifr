@@ -1,7 +1,7 @@
 import unittest
 import datetime
 import hiro
-from sifr.span import Minute, Day
+from sifr.span import Minute, Day, Hour
 from sifr.storage import MemoryStorage
 
 
@@ -50,3 +50,38 @@ class MemoryStorageTests(unittest.TestCase):
             self.assertEqual(storage.enumerate(span), set(["1", "2", "3"]))
             timeline.forward((60 * 60) + 1)
             self.assertEqual(storage.enumerate(span), set())
+
+    def test_multi(self):
+        with hiro.Timeline().freeze() as timeline:
+            storage = MemoryStorage()
+            spans = [
+                Minute(datetime.datetime.now(), ["minute_span"]),
+                Hour(datetime.datetime.now(), ["minute_span"])
+            ]
+            storage.incr_multi(spans)
+            storage.incr_unique_multi(spans, "1")
+            storage.incr_unique_multi(spans, "2")
+            storage.track_multi(spans, "1")
+            storage.track_multi(spans, "2")
+
+            self.assertEqual(storage.get(spans[0]), 1)
+            self.assertEqual(storage.get(spans[1]), 1)
+            self.assertEqual(storage.get_unique(spans[0]), 2)
+            self.assertEqual(storage.get_unique(spans[1]), 2)
+            self.assertEqual(storage.enumerate(spans[0]), set(["1", "2"]))
+            self.assertEqual(storage.enumerate(spans[1]), set(["1", "2"]))
+
+            timeline.forward((60*60) + 1)
+
+            self.assertEqual(storage.get(spans[0]), 0)
+            self.assertEqual(storage.get(spans[1]), 1)
+            self.assertEqual(storage.get_unique(spans[0]), 0)
+            self.assertEqual(storage.get_unique(spans[1]), 2)
+            self.assertEqual(storage.enumerate(spans[0]), set())
+            self.assertEqual(storage.enumerate(spans[1]), set(["1", "2"]))
+
+            timeline.forward((60*60*23) + 1)
+
+            self.assertEqual(storage.get(spans[1]), 0)
+            self.assertEqual(storage.get_unique(spans[1]), 0)
+            self.assertEqual(storage.enumerate(spans[1]), set())

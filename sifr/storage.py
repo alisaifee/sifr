@@ -5,6 +5,7 @@ import time
 import six
 
 from sifr.hll import get_hll
+import pylru
 
 try:
     from collections import Counter
@@ -70,6 +71,7 @@ class MemoryStorage(Storage):
         self.lock = threading.RLock()
         self.unique_counter = HLLCounter()
         self.counter = Counter()
+        self.tracker = {}
         self.expirations = {}
         self.timer = threading.Timer(0.01, self.__expire_events)
         self.timer.start()
@@ -88,10 +90,15 @@ class MemoryStorage(Storage):
         if self.expirations.get(key, 0) <= time.time():
             self.counter.pop(key, None)
             self.unique_counter.pop(key)
+            self.tracker.pop(key, None)
             self.expirations.pop(key, None)
 
     def enumerate(self, span):
-        pass
+        self.__check_expiry(span.key)
+        if not span.key in self.tracker:
+            return set()
+        else:
+            return set(self.tracker.get(span.key).keys())
 
     def get(self, span):
         self.__check_expiry(span.key)
@@ -102,7 +109,10 @@ class MemoryStorage(Storage):
         return self.unique_counter.get(span.key)
 
     def track(self, span, identifier, limit):
-        pass
+        self.expirations[span.key] = span.expiry
+        self.tracker.setdefault(span.key, pylru.lrucache(limit))
+        self.tracker[span.key][identifier] = 1
+        return self.tracker[span.key].keys()
 
     def incr(self, span, amount=1):
         self.get(span)

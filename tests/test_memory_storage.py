@@ -38,3 +38,17 @@ class MemoryStorageTests(unittest.TestCase):
             self.assertEqual(storage.get_unique(span), 2)
             timeline.forward((60 * 60) + 1)
             self.assertEqual(storage.get_unique(span), 0)
+
+    def test_tracker_minute(self):
+        with hiro.Timeline().freeze() as timeline:
+            span = Minute(datetime.datetime.now(), ["minute_span"])
+            storage = MemoryStorage()
+            storage.track(span, "1", 3)
+            storage.track(span, "1", 3)
+            storage.track(span, "2", 3)
+            storage.track(span, "3", 3)
+            self.assertEqual(storage.enumerate(span), {"1", "2", "3"})
+            storage.track(span, "4", 3)
+            self.assertEqual(storage.enumerate(span), {"4", "2", "3"})
+            timeline.forward((60 * 60) + 1)
+            self.assertEqual(storage.enumerate(span), set())

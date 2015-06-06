@@ -19,11 +19,23 @@ class Storage(object):
         raise NotImplemented
 
     @abstractmethod
+    def incr_multi(self, spans, amount=1):
+        raise NotImplemented
+
+    @abstractmethod
     def incr_unique(self, span, identifier, amount=1):
         raise NotImplemented
 
     @abstractmethod
+    def incr_unique_multi(self, spans, identifier, amount=1):
+        raise NotImplemented
+
+    @abstractmethod
     def track(self, span, identifier):
+        raise NotImplemented
+
+    @abstractmethod
+    def track_multi(self, spans, identifier):
         raise NotImplemented
 
     @abstractmethod
@@ -112,17 +124,29 @@ class MemoryStorage(Storage):
         self.tracker.setdefault(span.key, set())
         self.tracker[span.key].add(identifier)
 
+    def track_multi(self, spans, identifier):
+        for span in spans:
+            self.track_multi(span)
+
     def incr(self, span, amount=1):
         self.get(span)
         self.__schedule_expiry()
         self.expirations[span.key] = span.expiry
         self.counter[span.key] += amount
 
+    def incr_multi(self, spans, amount=1):
+        for span in spans:
+            self.incr(span)
+
     def incr_unique(self, span, identifier):
         self.get_unique(span)
         self.__schedule_expiry()
         self.expirations[span.key] = span.expiry
         self.unique_counter.add(span.key, identifier)
+
+    def incr_unique_multi(self, spans, identifier, amount=1):
+        for span in spans:
+            self.incr_unique(span, identifier)
 
 
 class RedisStorage(Storage):
@@ -133,6 +157,13 @@ class RedisStorage(Storage):
         with self.redis.pipeline() as pipeline:
             pipeline.sadd(span.key + ":t", identifier)
             pipeline.expireat(span.key + ":t", int(span.expiry))
+            pipeline.execute()
+
+    def track_multi(self, spans, identifier):
+        with self.redis.pipeline() as pipeline:
+            for span in spans:
+                pipeline.sadd(span.key + ":t", identifier)
+                pipeline.expireat(span.key + ":t", int(span.expiry))
             pipeline.execute()
 
     def enumerate(self, span):
@@ -148,10 +179,24 @@ class RedisStorage(Storage):
             pipeline.expireat(span.key, int(span.expiry))
             pipeline.execute()
 
+    def incr_unique_multi(self, spans, identifier, amount=1):
+        with self.redis.pipeline() as pipeline:
+            for span in spans:
+                pipeline.pfadd(span.key + ":u", identifier)
+                pipeline.expireat(span.key + ":u", int(span.expiry))
+            pipeline.execute()
+
     def incr(self, span, amount=1):
         with self.redis.pipeline() as pipeline:
             pipeline.incr(span.key + ":c")
             pipeline.expireat(span.key + ":c", int(span.expiry))
+            pipeline.execute()
+
+    def incr_multi(self, spans, amount=1):
+        with self.redis.pipeline() as pipeline:
+            for span in spans:
+                pipeline.incr(span.key + ":c")
+                pipeline.expireat(span.key + ":c", int(span.expiry))
             pipeline.execute()
 
     def get_unique(self, span):

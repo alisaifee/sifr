@@ -1,5 +1,4 @@
 six>=1.4.1
 redis>=2.10.3
 pylru==1.0.9
-HLL>=0.99
-hyperloglog>=0.0.9
+-e git+https://github.com/alisaifee/hyperloglog#egg=hyperloglog

@@ -4,7 +4,7 @@ import time
 
 import six
 
-from sifr.hll import get_hll
+from sifr.hll import HLL
 import pylru
 
 try:
@@ -57,7 +57,7 @@ class HLLCounter(Counter):
         self.counter.pop(key, None)
 
     def add(self, key, identifier):
-        self.counter.setdefault(key, get_hll()())
+        self.counter.setdefault(key, HLL())
         self.counter[key].add(identifier)
 
     def get(self, key):
@@ -112,14 +112,12 @@ class MemoryStorage(Storage):
         self.expirations[span.key] = span.expiry
         self.tracker.setdefault(span.key, pylru.lrucache(limit))
         self.tracker[span.key][identifier] = 1
-        return self.tracker[span.key].keys()
 
     def incr(self, span, amount=1):
         self.get(span)
         self.__schedule_expiry()
         self.expirations[span.key] = span.expiry
         self.counter[span.key] += amount
-        return self.counter[span.key]
 
     def incr_unique(self, span, identifier):
         self.get_unique(span)

@@ -156,14 +156,16 @@ class RedisStorage(Storage):
     def track(self, span, identifier):
         with self.redis.pipeline() as pipeline:
             pipeline.sadd(span.key + ":t", identifier)
-            pipeline.expireat(span.key + ":t", int(span.expiry))
+            pipeline.expire(span.key + ":t",
+                            int(span.expiry) - int(time.time()))
             pipeline.execute()
 
     def track_multi(self, spans, identifier):
         with self.redis.pipeline() as pipeline:
             for span in spans:
                 pipeline.sadd(span.key + ":t", identifier)
-                pipeline.expireat(span.key + ":t", int(span.expiry))
+                pipeline.expire(span.key + ":t",
+                                int(span.expiry) - int(time.time()))
             pipeline.execute()
 
     def enumerate(self, span):
@@ -176,27 +178,31 @@ class RedisStorage(Storage):
     def incr_unique(self, span, identifier, amount=1):
         with self.redis.pipeline() as pipeline:
             pipeline.pfadd(span.key + ":u", identifier)
-            pipeline.expireat(span.key, int(span.expiry))
+            pipeline.expire(span.key + ":u",
+                            int(span.expiry) - int(time.time()))
             pipeline.execute()
 
     def incr_unique_multi(self, spans, identifier, amount=1):
         with self.redis.pipeline() as pipeline:
             for span in spans:
                 pipeline.pfadd(span.key + ":u", identifier)
-                pipeline.expireat(span.key + ":u", int(span.expiry))
+                pipeline.expire(span.key + ":u",
+                                int(span.expiry) - int(time.time()))
             pipeline.execute()
 
     def incr(self, span, amount=1):
         with self.redis.pipeline() as pipeline:
             pipeline.incr(span.key + ":c")
-            pipeline.expireat(span.key + ":c", int(span.expiry))
+            pipeline.expire(span.key + ":c",
+                            int(span.expiry) - int(time.time()))
             pipeline.execute()
 
     def incr_multi(self, spans, amount=1):
         with self.redis.pipeline() as pipeline:
             for span in spans:
                 pipeline.incr(span.key + ":c")
-                pipeline.expireat(span.key + ":c", int(span.expiry))
+                pipeline.expire(span.key + ":c",
+                                int(span.expiry) - int(time.time()))
             pipeline.execute()
 
     def get_unique(self, span):

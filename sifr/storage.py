@@ -131,29 +131,29 @@ class RedisStorage(Storage):
 
     def track(self, span, identifier):
         with self.redis.pipeline() as pipeline:
-            pipeline.sadd(span.key, identifier)
-            pipeline.expireat(span.key, int(span.expiry))
+            pipeline.sadd(span.key + ":t", identifier)
+            pipeline.expireat(span.key + ":t", int(span.expiry))
             pipeline.execute()
 
     def enumerate(self, span):
-        return self.redis.smembers(span.key) or set()
+        return self.redis.smembers(span.key + ":t") or set()
 
     def get(self, span):
-        value = self.redis.get(span.key)
+        value = self.redis.get(span.key + ":c")
         return int(value) if value is not None else 0
 
     def incr_unique(self, span, identifier, amount=1):
         with self.redis.pipeline() as pipeline:
-            pipeline.pfadd(span.key, identifier)
+            pipeline.pfadd(span.key + ":u", identifier)
             pipeline.expireat(span.key, int(span.expiry))
             pipeline.execute()
 
     def incr(self, span, amount=1):
         with self.redis.pipeline() as pipeline:
-            pipeline.incr(span.key)
-            pipeline.expireat(span.key, int(span.expiry))
+            pipeline.incr(span.key + ":c")
+            pipeline.expireat(span.key + ":c", int(span.expiry))
             pipeline.execute()
 
     def get_unique(self, span):
-        value = self.redis.pfcount(span.key)
+        value = self.redis.pfcount(span.key + ":u")
         return int(value) if value is not None else 0

@@ -151,4 +151,3 @@ def get_time_spans(start, end, buckets=ALL_SPANS):
         else:
             spans.extend(get_time_spans(start, end, list(buckets)))
     return sorted(spans)
-

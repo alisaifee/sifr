@@ -1,14 +1,15 @@
 import unittest
 import datetime
-import hiro
+
 import redis
-from sifr.span import Minute, Day
-from sifr.storage import MemoryStorage, RedisStorage
+
+from sifr.span import Minute
+from sifr.storage import RedisStorage
 
 
 class RedisStorageTests(unittest.TestCase):
     def setUp(self):
-        self.redis = redis.Redis()
+        self.redis = redis.Redis(decode_responses=True)
         self.redis.flushall()
 
     def test_incr_simple_minute(self):

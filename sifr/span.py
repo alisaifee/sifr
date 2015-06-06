@@ -5,8 +5,7 @@ import time
 try:
     from functools import total_ordering
 except ImportError:
-    from sifr.backports import total_ordering
-
+    from sifr.backports.total_ordering import total_ordering
 
 @total_ordering
 class Span(object):

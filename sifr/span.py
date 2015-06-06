@@ -30,7 +30,7 @@ class Span(object):
 
     @property
     def next(self):
-        n = self.__class__(self.range[1] + datetime.timedelta(seconds=1))
+        n = self.__class__(self.range[1] + datetime.timedelta(seconds=1), [])
         n._key = self._key
         return n
 
@@ -134,11 +134,11 @@ ALL_SPANS = [Year, Month, Day, Hour, Minute]
 SPAN_ORDER = [Minute, Hour, Day, Month, Year]
 
 
-def get_time_spans(start, end, buckets=ALL_SPANS):
+def get_time_spans(start, end, keys, buckets=ALL_SPANS):
     spans = []
     buckets = list(buckets)
     if buckets:
-        cur_bucket = buckets[0](start)
+        cur_bucket = buckets[0](start, keys)
         while cur_bucket.range[1] <= end:
             if start <= cur_bucket.range[0] and cur_bucket.range[1] <= end:
                 spans.append(cur_bucket)
@@ -147,8 +147,8 @@ def get_time_spans(start, end, buckets=ALL_SPANS):
         if spans:
             min_left = min(spans).range[0]
             max_right = max(spans).range[1]
-            spans.extend(get_time_spans(start, min_left, list(buckets)))
-            spans.extend(get_time_spans(max_right, end, list(buckets)))
+            spans.extend(get_time_spans(start, min_left, keys, list(buckets)))
+            spans.extend(get_time_spans(max_right, end, keys, list(buckets)))
         else:
-            spans.extend(get_time_spans(start, end, list(buckets)))
+            spans.extend(get_time_spans(start, end, keys, list(buckets)))
     return sorted(spans)

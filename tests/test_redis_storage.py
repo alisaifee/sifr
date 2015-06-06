@@ -18,7 +18,7 @@ class RedisStorageTests(unittest.TestCase):
         storage.incr(span)
         storage.incr(span)
         self.assertEqual(storage.get(span), 2)
-        self.assertGreater(self.redis.ttl(span.key + ":c"), 3000)
+        self.assertTrue(self.redis.ttl(span.key + ":c") > 3000)
 
     def test_incr_unique_minute(self):
         red = redis.Redis()
@@ -28,7 +28,7 @@ class RedisStorageTests(unittest.TestCase):
         storage.incr_unique(span, "1")
         storage.incr_unique(span, "2")
         self.assertEqual(storage.get_unique(span), 2)
-        self.assertGreater(self.redis.ttl(span.key + ":u"), 3000)
+        self.assertTrue(self.redis.ttl(span.key + ":u") > 3000)
 
     def test_tracker_minute(self):
         span = Minute(datetime.datetime.now(), ["minute_span"])
@@ -38,4 +38,4 @@ class RedisStorageTests(unittest.TestCase):
         storage.track(span, "2")
         storage.track(span, "3")
         self.assertEqual(storage.enumerate(span), set(["1", "2", "3"]))
-        self.assertGreater(self.redis.ttl(span.key + ":t"), 3000)
+        self.assertTrue(self.redis.ttl(span.key + ":t") > 3000)

@@ -16,6 +16,8 @@ class Span(object):
                 self.expiry = time.mktime((
                     at + datetime.timedelta(seconds=SPAN_ORDER[next].duration)
                 ).timetuple())
+            else:
+                self.expiry = None
         else:
             self.expiry = expiry
         self.at = at
@@ -113,7 +115,7 @@ class Month(Span):
 
 class Year(Span):
     fmt = "%Y"
-    duration = 60 * 60 * 24 * 30 * 365
+    duration = 60 * 60 * 24 * 365
 
     @property
     def range(self):

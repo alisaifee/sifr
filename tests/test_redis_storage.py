@@ -28,11 +28,10 @@ class RedisStorageTests(unittest.TestCase):
         self.assertEqual(storage.get_unique(span), 2)
 
     def test_tracker_minute(self):
-        with hiro.Timeline().freeze() as timeline:
-            span = Minute(datetime.datetime.now(), ["minute_span"])
-            storage = RedisStorage(self.redis)
-            storage.track(span, "1", 3)
-            storage.track(span, "1", 3)
-            storage.track(span, "2", 3)
-            storage.track(span, "3", 3)
-            self.assertEqual(storage.enumerate(span), set(["1", "2", "3"]))
+        span = Minute(datetime.datetime.now(), ["minute_span"])
+        storage = RedisStorage(self.redis)
+        storage.track(span, "1", 3)
+        storage.track(span, "1", 3)
+        storage.track(span, "2", 3)
+        storage.track(span, "3", 3)
+        self.assertEqual(storage.enumerate(span), set(["1", "2", "3"]))

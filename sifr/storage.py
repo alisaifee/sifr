@@ -51,16 +51,6 @@ class Storage(object):
         raise NotImplementedError
 
 
-class LockableEntry(threading._RLock):
-    __slots__ = ["atime", "expiry"]
-
-    def __init__(self, expiry):
-        self.atime = time.time()
-        self.expiry = self.atime + expiry
-        super(LockableEntry, self).__init__()
-
-
-
 
 class MemoryStorage(Storage):
     def __init__(self):

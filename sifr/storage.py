@@ -4,7 +4,7 @@ import time
 
 import six
 
-from sifr.hll import HLL
+from sifr.hll import HLLCounter
 
 try:
     from collections import Counter
@@ -60,21 +60,6 @@ class LockableEntry(threading._RLock):
         super(LockableEntry, self).__init__()
 
 
-class HLLCounter(Counter):
-    def __init__(self):
-        self.counter = {}
-
-    def pop(self, key):
-        self.counter.pop(key, None)
-
-    def add(self, key, identifier):
-        self.counter.setdefault(key, HLL())
-        self.counter[key].add(identifier)
-
-    def get(self, key):
-        if not key in self.counter:
-            return 0
-        return self.counter[key].count()
 
 
 class MemoryStorage(Storage):

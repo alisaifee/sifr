@@ -1,12 +1,36 @@
 from hyperloglog import HyperLogLog
 
 
-class HLL(object):
+class HLLCounter(object):
     def __init__(self):
-        self.hll = HyperLogLog(0.005)
+        """
+        Simple counter that uses hyperloglog
+        to count unique occurrences per key
+        """
+        self.counter = {}
 
-    def add(self, identity):
-        self.hll.add(str(identity))
+    def pop(self, key):
+        """
+        Removes a key from the counter
+        :param key:
+        """
+        self.counter.pop(key, None)
 
-    def count(self):
-        return int(self.hll.card())
+    def add(self, key, identifier):
+        """
+        Adds a key to the counter
+        :param key:
+        :param identifier: any object that can be represented
+         as a string
+        """
+        self.counter.setdefault(key, HyperLogLog(0.005))
+        self.counter[key].add(str(identifier))
+
+    def get(self, key):
+        """
+        Gets the unique occurrences in the set
+        :param key:
+        """
+        if not key in self.counter:
+            return 0
+        return int(self.counter[key].card())

@@ -16,39 +16,39 @@ except ImportError:  # pragma: no cover
 class Storage(object):
     @abstractmethod
     def incr(self, span, amount=1):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def incr_multi(self, spans, amount=1):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def incr_unique(self, span, identifier, amount=1):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def incr_unique_multi(self, spans, identifier, amount=1):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def track(self, span, identifier):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def track_multi(self, spans, identifier):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def get(self, span):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def get_unique(self, span):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def enumerate(self, span):
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class LockableEntry(threading._RLock):

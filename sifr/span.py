@@ -1,13 +1,24 @@
 import calendar
 import datetime
+import time
+
 try:
     from functools import total_ordering
 except ImportError:
     from sifr.backports import total_ordering
 
+
 @total_ordering
 class Span(object):
-    def __init__(self, at, *keys):
+    def __init__(self, at, keys, expiry=None):
+        if not expiry:
+            next = SPAN_ORDER.index(self.__class__) + 1
+            if next < len(SPAN_ORDER):
+                self.expiry = time.mktime((
+                    at + datetime.timedelta(seconds=SPAN_ORDER[next].duration)
+                ).timetuple())
+        else:
+            self.expiry = expiry
         self.at = at
         self._key = ":".join(keys)
 
@@ -31,6 +42,7 @@ class Span(object):
 
 class Minute(Span):
     fmt = "%Y-%m-%d %H:%M"
+    duration = 60
 
     @property
     def range(self):
@@ -49,6 +61,7 @@ class Minute(Span):
 
 class Hour(Span):
     fmt = "%Y-%m-%d %H"
+    duration = 60 * 60
 
     @property
     def range(self):
@@ -66,6 +79,7 @@ class Hour(Span):
 
 class Day(Span):
     fmt = "%Y-%m-%d"
+    duration = 60 * 60 * 24
 
     @property
     def range(self):
@@ -82,6 +96,7 @@ class Day(Span):
 
 class Month(Span):
     fmt = "%Y-%m"
+    duration = 60 * 60 * 24 * 30
 
     @property
     def range(self):
@@ -99,6 +114,7 @@ class Month(Span):
 
 class Year(Span):
     fmt = "%Y"
+    duration = 60 * 60 * 24 * 30 * 365
 
     @property
     def range(self):
@@ -113,7 +129,11 @@ class Year(Span):
                                   second=59))
 
 
-def get_time_spans(start, end, buckets=[Year, Month, Day, Hour, Minute]):
+ALL_SPANS = [Year, Month, Day, Hour, Minute]
+SPAN_ORDER = [Minute, Hour, Day, Month, Year]
+
+
+def get_time_spans(start, end, buckets=ALL_SPANS):
     spans = []
     buckets = list(buckets)
     if buckets:

@@ -1,8 +1,9 @@
 from abc import abstractmethod, ABCMeta
 import threading
-import hyperloglog
-import six
 import time
+
+import six
+
 from sifr.hll import get_hll
 
 try:

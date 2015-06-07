@@ -41,6 +41,14 @@ class SpanTests(unittest.TestCase):
             self.assertEqual(span.key, "single:2012")
             self.assertEqual(span.expiry, None)
 
+    def test_explicit_expiry(self):
+        now = datetime.datetime.now()
+        span = Year(now, ["single"], expiry=datetime.datetime(2012,12,30))
+        self.assertEqual(
+            span.expiry,
+            datetime.datetime(2012,12,30)
+        )
+
     def test_query_keys_default_buckets(self):
             self.assertEqual(
                 [k.key for k in get_time_spans(

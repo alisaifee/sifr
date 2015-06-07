@@ -10,12 +10,12 @@ class DatetimeTests(unittest.TestCase):
     def test_num(self):
         with hiro.Timeline().freeze(datetime.datetime(2012, 12, 12)):
             self.assertEqual(
-                normalize_time(1.0),
-                datetime.datetime(1970, 1, 1, 7, 30, 1)
+                normalize_time(1.0).year,
+                1970
             )
             self.assertEqual(
-                normalize_time(1),
-                datetime.datetime(1970, 1, 1, 7, 30, 1)
+                normalize_time(1).year,
+                1970
             )
             self.assertEqual(
                 normalize_time(time.time()),

@@ -1,4 +1,4 @@
 six>=1.4.1
 redis>=2.10.3
-python-dateutils>=2.4.2
+python-dateutil>=2.4.2
 -e git+https://github.com/alisaifee/hyperloglog#egg=hyperloglog

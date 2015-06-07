@@ -63,8 +63,9 @@ class MemoryStorage(Storage):
         super(MemoryStorage, self).__init__()
 
     def __expire_events(self):
-        for key in list(self.expirations.keys()):
-            self.__check_expiry(key)
+        with self.lock:
+            for key in list(self.expirations.keys()):
+                self.__check_expiry(key)
 
     def __schedule_expiry(self):
         if not self.timer.is_alive():
@@ -72,11 +73,12 @@ class MemoryStorage(Storage):
             self.timer.start()
 
     def __check_expiry(self, key):
-        if self.expirations.get(key, 0) <= time.time():
-            self.counter.pop(key, None)
-            self.unique_counter.pop(key)
-            self.tracker.pop(key, None)
-            self.expirations.pop(key, None)
+        with self.lock:
+            if key in self.expirations and self.expirations[key] <= time.time():
+                self.counter.pop(key, None)
+                self.unique_counter.pop(key)
+                self.tracker.pop(key, None)
+                self.expirations.pop(key, None)
 
     def enumerate(self, span):
         self.__check_expiry(span.key)
@@ -94,7 +96,8 @@ class MemoryStorage(Storage):
         return self.unique_counter.get(span.key)
 
     def track(self, span, identifier):
-        self.expirations[span.key] = span.expiry
+        if span.expiry is not None:
+            self.expirations[span.key] = span.expiry
         self.tracker.setdefault(span.key, set())
         self.tracker[span.key].add(identifier)
 
@@ -103,10 +106,12 @@ class MemoryStorage(Storage):
             self.track(span, identifier)
 
     def incr(self, span, amount=1):
-        self.get(span)
-        self.__schedule_expiry()
-        self.expirations[span.key] = span.expiry
-        self.counter[span.key] += amount
+        with self.lock:
+            self.get(span)
+            self.__schedule_expiry()
+            if span.expiry is not None:
+                self.expirations[span.key] = span.expiry
+            self.counter[span.key] += amount
 
     def incr_multi(self, spans, amount=1):
         for span in spans:
@@ -115,7 +120,8 @@ class MemoryStorage(Storage):
     def incr_unique(self, span, identifier):
         self.get_unique(span)
         self.__schedule_expiry()
-        self.expirations[span.key] = span.expiry
+        if span.expiry is not None:
+            self.expirations[span.key] = span.expiry
         self.unique_counter.add(span.key, identifier)
 
     def incr_unique_multi(self, spans, identifier, amount=1):

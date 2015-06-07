@@ -14,7 +14,7 @@ def normalize_time(t):
         elif isinstance(t, six.string_types):
             return parser.parse(t)
         else:
-            raise
+            raise TypeError
     except:  # noqa
         raise TypeError(
             "time must be represented as either a timestamp (int,float), "

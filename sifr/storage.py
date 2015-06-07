@@ -74,7 +74,10 @@ class MemoryStorage(Storage):
 
     def __check_expiry(self, key):
         with self.lock:
-            if key in self.expirations and self.expirations[key] <= time.time():
+            if (
+                key in self.expirations
+                and self.expirations[key] <= time.time()
+            ):
                 self.counter.pop(key, None)
                 self.unique_counter.pop(key)
                 self.tracker.pop(key, None)

@@ -15,9 +15,13 @@ class Span(object):
         if not expiry:
             next = SPAN_ORDER.index(self.__class__) + 1
             if next < len(SPAN_ORDER):
-                self.expiry = time.mktime((
-                    normalize_time(at) + datetime.timedelta(seconds=SPAN_ORDER[next].duration)
-                ).timetuple())
+                self.expiry = time.mktime(
+                    (
+                        normalize_time(at) + datetime.timedelta(
+                            seconds=SPAN_ORDER[next].duration
+                        )
+                    ).timetuple()
+                )
             else:
                 self.expiry = None
         else:

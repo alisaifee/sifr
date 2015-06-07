@@ -37,7 +37,7 @@ class Span(object):
     def __lt__(self, other):
         return self.at < other.at
 
-    def __repr__(self): # noqa
+    def __repr__(self):  # pragma: no cover
         return self.at.strftime(self.fmt)
 
 

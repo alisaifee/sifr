@@ -1,6 +1,7 @@
 import calendar
 import datetime
 import time
+from sifr.util import normalize_time
 
 try:
     from functools import total_ordering
@@ -15,13 +16,13 @@ class Span(object):
             next = SPAN_ORDER.index(self.__class__) + 1
             if next < len(SPAN_ORDER):
                 self.expiry = time.mktime((
-                    at + datetime.timedelta(seconds=SPAN_ORDER[next].duration)
+                    normalize_time(at) + datetime.timedelta(seconds=SPAN_ORDER[next].duration)
                 ).timetuple())
             else:
                 self.expiry = None
         else:
             self.expiry = expiry
-        self.at = at
+        self.at = normalize_time(at)
         self._key = ":".join([str(k) for k in keys])
 
     @property

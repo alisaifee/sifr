@@ -39,15 +39,15 @@ class Storage(object):
         raise NotImplementedError
 
     @abstractmethod
-    def get(self, span):
+    def count(self, span):
         raise NotImplementedError
 
     @abstractmethod
-    def get_unique(self, span):
+    def cardinality(self, span):
         raise NotImplementedError
 
     @abstractmethod
-    def enumerate(self, span):
+    def uniques(self, span):
         raise NotImplementedError
 
 
@@ -80,18 +80,18 @@ class MemoryStorage(Storage):
                 self.tracker.pop(key, None)
                 self.expirations.pop(key, None)
 
-    def enumerate(self, span):
+    def uniques(self, span):
         self.__check_expiry(span.key)
         if span.key not in self.tracker:
             return set()
         else:
             return self.tracker.get(span.key)
 
-    def get(self, span):
+    def count(self, span):
         self.__check_expiry(span.key)
         return self.counter.get(span.key, 0)
 
-    def get_unique(self, span):
+    def cardinality(self, span):
         self.__check_expiry(span.key)
         return self.unique_counter.get(span.key)
 
@@ -107,7 +107,7 @@ class MemoryStorage(Storage):
 
     def incr(self, span, amount=1):
         with self.lock:
-            self.get(span)
+            self.count(span)
             self.__schedule_expiry()
             if span.expiry is not None:
                 self.expirations[span.key] = span.expiry
@@ -118,7 +118,7 @@ class MemoryStorage(Storage):
             self.incr(span)
 
     def incr_unique(self, span, identifier):
-        self.get_unique(span)
+        self.cardinality(span)
         self.__schedule_expiry()
         if span.expiry is not None:
             self.expirations[span.key] = span.expiry
@@ -148,10 +148,10 @@ class RedisStorage(Storage):
                                 int(span.expiry) - int(time.time()))
             pipeline.execute()
 
-    def enumerate(self, span):
+    def uniques(self, span):
         return self.redis.smembers(span.key + ":t") or set()
 
-    def get(self, span):
+    def count(self, span):
         value = self.redis.get(span.key + ":c")
         return int(value) if value is not None else 0
 
@@ -185,6 +185,6 @@ class RedisStorage(Storage):
                                 int(span.expiry) - int(time.time()))
             pipeline.execute()
 
-    def get_unique(self, span):
+    def cardinality(self, span):
         value = self.redis.pfcount(span.key + ":u")
         return int(value) if value is not None else 0

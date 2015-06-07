@@ -11,33 +11,33 @@ class MemoryStorageTests(unittest.TestCase):
             span = Minute(datetime.datetime.now(), ["minute_span"])
             storage = MemoryStorage()
             storage.incr(span)
-            self.assertEqual(storage.get(span), 1)
+            self.assertEqual(storage.count(span), 1)
             storage.incr(span)
-            self.assertEqual(storage.get(span), 2)
+            self.assertEqual(storage.count(span), 2)
             timeline.forward((60 * 60) + 1)
-            self.assertEqual(storage.get(span), 0)
+            self.assertEqual(storage.count(span), 0)
 
     def test_incr_simple_day(self):
         with hiro.Timeline().freeze() as timeline:
             span = Day(datetime.datetime.now(), ["day_span"])
             storage = MemoryStorage()
             storage.incr(span)
-            self.assertEqual(storage.get(span), 1)
+            self.assertEqual(storage.count(span), 1)
             timeline.forward((60 * 60 * 24 * 30) + 1)
-            self.assertEqual(storage.get(span), 0)
+            self.assertEqual(storage.count(span), 0)
 
     def test_incr_unique_minute(self):
         with hiro.Timeline().freeze() as timeline:
             span = Minute(datetime.datetime.now(), ["minute_span"])
             storage = MemoryStorage()
             storage.incr_unique(span, "1")
-            self.assertEqual(storage.get_unique(span), 1)
+            self.assertEqual(storage.cardinality(span), 1)
             storage.incr_unique(span, "1")
-            self.assertEqual(storage.get_unique(span), 1)
+            self.assertEqual(storage.cardinality(span), 1)
             storage.incr_unique(span, "2")
-            self.assertEqual(storage.get_unique(span), 2)
+            self.assertEqual(storage.cardinality(span), 2)
             timeline.forward((60 * 60) + 1)
-            self.assertEqual(storage.get_unique(span), 0)
+            self.assertEqual(storage.cardinality(span), 0)
 
     def test_tracker_minute(self):
         with hiro.Timeline().freeze() as timeline:
@@ -47,9 +47,9 @@ class MemoryStorageTests(unittest.TestCase):
             storage.track(span, "1")
             storage.track(span, "2")
             storage.track(span, "3")
-            self.assertEqual(storage.enumerate(span), set(["1", "2", "3"]))
+            self.assertEqual(storage.uniques(span), set(["1", "2", "3"]))
             timeline.forward((60 * 60) + 1)
-            self.assertEqual(storage.enumerate(span), set())
+            self.assertEqual(storage.uniques(span), set())
 
     def test_multi(self):
         with hiro.Timeline().freeze() as timeline:
@@ -64,24 +64,24 @@ class MemoryStorageTests(unittest.TestCase):
             storage.track_multi(spans, "1")
             storage.track_multi(spans, "2")
 
-            self.assertEqual(storage.get(spans[0]), 1)
-            self.assertEqual(storage.get(spans[1]), 1)
-            self.assertEqual(storage.get_unique(spans[0]), 2)
-            self.assertEqual(storage.get_unique(spans[1]), 2)
-            self.assertEqual(storage.enumerate(spans[0]), set(["1", "2"]))
-            self.assertEqual(storage.enumerate(spans[1]), set(["1", "2"]))
+            self.assertEqual(storage.count(spans[0]), 1)
+            self.assertEqual(storage.count(spans[1]), 1)
+            self.assertEqual(storage.cardinality(spans[0]), 2)
+            self.assertEqual(storage.cardinality(spans[1]), 2)
+            self.assertEqual(storage.uniques(spans[0]), set(["1", "2"]))
+            self.assertEqual(storage.uniques(spans[1]), set(["1", "2"]))
 
             timeline.forward((60*60) + 1)
 
-            self.assertEqual(storage.get(spans[0]), 0)
-            self.assertEqual(storage.get(spans[1]), 1)
-            self.assertEqual(storage.get_unique(spans[0]), 0)
-            self.assertEqual(storage.get_unique(spans[1]), 2)
-            self.assertEqual(storage.enumerate(spans[0]), set())
-            self.assertEqual(storage.enumerate(spans[1]), set(["1", "2"]))
+            self.assertEqual(storage.count(spans[0]), 0)
+            self.assertEqual(storage.count(spans[1]), 1)
+            self.assertEqual(storage.cardinality(spans[0]), 0)
+            self.assertEqual(storage.cardinality(spans[1]), 2)
+            self.assertEqual(storage.uniques(spans[0]), set())
+            self.assertEqual(storage.uniques(spans[1]), set(["1", "2"]))
 
             timeline.forward((60*60*23) + 1)
 
-            self.assertEqual(storage.get(spans[1]), 0)
-            self.assertEqual(storage.get_unique(spans[1]), 0)
-            self.assertEqual(storage.enumerate(spans[1]), set())
+            self.assertEqual(storage.count(spans[1]), 0)
+            self.assertEqual(storage.cardinality(spans[1]), 0)
+            self.assertEqual(storage.uniques(spans[1]), set())

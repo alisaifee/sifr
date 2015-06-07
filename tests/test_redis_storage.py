@@ -17,7 +17,7 @@ class RedisStorageTests(unittest.TestCase):
         storage = RedisStorage(self.redis)
         storage.incr(span)
         storage.incr(span)
-        self.assertEqual(storage.get(span), 2)
+        self.assertEqual(storage.count(span), 2)
         self.assertTrue(self.redis.ttl(span.key + ":c") > 3000)
 
     def test_incr_unique_minute(self):
@@ -27,7 +27,7 @@ class RedisStorageTests(unittest.TestCase):
         storage.incr_unique(span, "1")
         storage.incr_unique(span, "1")
         storage.incr_unique(span, "2")
-        self.assertEqual(storage.get_unique(span), 2)
+        self.assertEqual(storage.cardinality(span), 2)
         self.assertTrue(self.redis.ttl(span.key + ":u") > 3000)
 
     def test_tracker_minute(self):
@@ -37,7 +37,7 @@ class RedisStorageTests(unittest.TestCase):
         storage.track(span, "1")
         storage.track(span, "2")
         storage.track(span, "3")
-        self.assertEqual(storage.enumerate(span), set(["1", "2", "3"]))
+        self.assertEqual(storage.uniques(span), set(["1", "2", "3"]))
         self.assertTrue(self.redis.ttl(span.key + ":t") > 3000)
 
     def test_multi(self):
@@ -52,12 +52,12 @@ class RedisStorageTests(unittest.TestCase):
         storage.track_multi(spans, "1")
         storage.track_multi(spans, "2")
 
-        self.assertEqual(storage.get(spans[0]), 1)
-        self.assertEqual(storage.get(spans[1]), 1)
-        self.assertEqual(storage.get_unique(spans[0]), 2)
-        self.assertEqual(storage.get_unique(spans[1]), 2)
-        self.assertEqual(storage.enumerate(spans[0]), set(["1", "2"]))
-        self.assertEqual(storage.enumerate(spans[1]), set(["1", "2"]))
+        self.assertEqual(storage.count(spans[0]), 1)
+        self.assertEqual(storage.count(spans[1]), 1)
+        self.assertEqual(storage.cardinality(spans[0]), 2)
+        self.assertEqual(storage.cardinality(spans[1]), 2)
+        self.assertEqual(storage.uniques(spans[0]), set(["1", "2"]))
+        self.assertEqual(storage.uniques(spans[1]), set(["1", "2"]))
 
         self.assertTrue(self.redis.ttl(spans[0].key + ":t") > 3000)
         self.assertTrue(self.redis.ttl(spans[1].key + ":t") > 3599*24)

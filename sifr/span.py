@@ -7,6 +7,7 @@ try:
 except ImportError:
     from sifr.backports.total_ordering import total_ordering
 
+
 @total_ordering
 class Span(object):
     def __init__(self, at, keys, expiry=None):

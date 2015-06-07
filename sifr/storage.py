@@ -51,7 +51,6 @@ class Storage(object):
         raise NotImplementedError
 
 
-
 class MemoryStorage(Storage):
     def __init__(self):
         self.lock = threading.RLock()
@@ -81,7 +80,7 @@ class MemoryStorage(Storage):
 
     def enumerate(self, span):
         self.__check_expiry(span.key)
-        if not span.key in self.tracker:
+        if span.key not in self.tracker:
             return set()
         else:
             return self.tracker.get(span.key)

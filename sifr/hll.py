@@ -31,6 +31,6 @@ class HLLCounter(object):
         Gets the unique occurrences in the set
         :param key:
         """
-        if not key in self.counter:
+        if key not in self.counter:
             return 0
         return int(self.counter[key].card())

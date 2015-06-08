@@ -12,6 +12,8 @@ install:
 services:
     - redis-server
 
-script: nosetests tests --with-cov -v
+script: 
+    - nosetests tests --with-cov -v
+    - flake8 sifr --max-complexity=10
 after_success:
     - coveralls

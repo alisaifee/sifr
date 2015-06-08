@@ -1,0 +1,4 @@
+exclude_paths:
+  - sifr/backports/*
+  - versioneer.py
+  - sifr/_version.py

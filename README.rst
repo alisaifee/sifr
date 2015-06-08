@@ -16,7 +16,6 @@ sifr
 
 .. image:: http://i.imgur.com/luJUJ31.png
 
-Read more at `readthedocs <http://sifr.readthedocs.org>`_
 
 
 

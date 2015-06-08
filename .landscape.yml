@@ -8,7 +8,7 @@ requirements:
 ignore-paths:
     - tests
     - sifr/backports
-    - doc/vendor
+    - doc
 ignore-patterns:
     - versioneer.py
     - sifr/_versions.py

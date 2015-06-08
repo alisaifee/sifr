@@ -6,11 +6,13 @@
     :target: https://pypi.python.org/pypi/sifr
 .. |license| image:: https://img.shields.io/pypi/l/sifr.svg?style=flat-square
     :target: https://pypi.python.org/pypi/sifr
+.. |landscape| image:: https://landscape.io/github/alisaifee/sifr/master/landscape.svg?style=flat
+    :target: https://landscape.io/github/alisaifee/sifr/master
 
 *************
 sifr
 *************
-|travis-ci| |coveralls| |pypi| |license|
+|travis-ci| |coveralls| |landscape| |pypi| |license|
 
 .. image:: http://i.imgur.com/luJUJ31.png
 

@@ -2,6 +2,7 @@ import datetime
 from dateutil import parser
 import six
 
+
 def normalize_time(t):
     try:
         if isinstance(t, datetime.datetime):
@@ -14,7 +15,7 @@ def normalize_time(t):
             return parser.parse(t)
         else:
             raise TypeError
-    except: # noqa
+    except:  # noqa
         raise TypeError(
             "time must be represented as either a timestamp (int,float), "
             "a datetime.(datetime/date) object, "

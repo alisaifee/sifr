@@ -1,0 +1,15 @@
+doc-warnings: yes
+test-warnings: no
+strictness: veryhigh
+max-line-length: 80
+autodetect: yes
+requirements:
+    - requirements/main.txt
+ignore-paths:
+    - tests
+    - sifr/backports
+    - doc/vendor
+ignore-patterns:
+    - versioneer.py
+    - sifr/_versions.py
+

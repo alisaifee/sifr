@@ -147,8 +147,11 @@ class RedisStorage(Storage):
         with self.redis.pipeline() as pipeline:
             for span in spans:
                 pipeline.sadd(span.key + ":t", identifier)
-                pipeline.expire(span.key + ":t",
-                                int(span.expiry) - int(time.time()))
+                if span.expiry is not None:
+                    pipeline.expire(
+                        span.key + ":t",
+                        int(span.expiry) - int(time.time())
+                    )
             pipeline.execute()
 
     def uniques(self, span):
@@ -169,23 +172,32 @@ class RedisStorage(Storage):
         with self.redis.pipeline() as pipeline:
             for span in spans:
                 pipeline.pfadd(span.key + ":u", identifier)
-                pipeline.expire(span.key + ":u",
-                                int(span.expiry) - int(time.time()))
+                if span.expiry is not None:
+                    pipeline.expire(
+                        span.key + ":u",
+                        int(span.expiry) - int(time.time())
+                    )
             pipeline.execute()
 
     def incr(self, span, amount=1):
         with self.redis.pipeline() as pipeline:
             pipeline.incr(span.key + ":c")
-            pipeline.expire(span.key + ":c",
-                            int(span.expiry) - int(time.time()))
+            if span.expiry is not None:
+                pipeline.expire(
+                    span.key + ":c",
+                    int(span.expiry) - int(time.time())
+                )
             pipeline.execute()
 
     def incr_multi(self, spans, amount=1):
         with self.redis.pipeline() as pipeline:
             for span in spans:
                 pipeline.incr(span.key + ":c")
-                pipeline.expire(span.key + ":c",
-                                int(span.expiry) - int(time.time()))
+                if span.expiry is not None:
+                    pipeline.expire(
+                        span.key + ":c",
+                        int(span.expiry) - int(time.time())
+                    )
             pipeline.execute()
 
     def cardinality(self, span):

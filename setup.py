@@ -14,11 +14,12 @@ this_dir = os.path.abspath(os.path.dirname(__file__))
 egg = re.compile("\#egg\=(.*?)$")
 requirements = filter(None, open(
     os.path.join(this_dir, 'requirements', 'main.txt')).read().splitlines())
+daemon_requirements = filter(None, open(
+    os.path.join(this_dir, 'requirements', 'daemon.txt')).read().splitlines())
 REQUIREMENTS = [req for req in requirements if not req.startswith('-e')]
 DEPENDENCY_LINKS = [req.replace('-e ','') for req in requirements if req.startswith('-e')]
 REQUIREMENTS.extend([egg.findall(req)[0] for req in requirements if req.startswith('-e')])
-
-print REQUIREMENTS, DEPENDENCY_LINKS
+DAEMON_REQUIREMENTS = [req for req in daemon_requirements if not req.startswith('-e')]
 
 import versioneer
 
@@ -37,9 +38,17 @@ setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     install_requires=REQUIREMENTS,
+    extras_require={
+        'daemon': DAEMON_REQUIREMENTS
+    },
     dependency_links=DEPENDENCY_LINKS,
     classifiers=[k for k in open('CLASSIFIERS').read().split('\n') if k],
-    description='Rate limiting utilities',
+    description='Window based counters',
     long_description=open('README.rst').read() + open('HISTORY.rst').read(),
     packages=find_packages(exclude=["tests*"]),
+    entry_points={
+        'console_scripts': [
+            'sifrd = sifr.daemon:run [daemon]'
+        ]
+    }
 )

@@ -118,7 +118,7 @@ sifr.yml (using a riak backend)
     storage: riak
     riak_nodes:
         - host: localhost
-        - pb_port: 8087
+          pb_port: 8087
     host: localhost
     port: 6000
 

@@ -2,7 +2,7 @@ import unittest
 import datetime
 import time
 import hiro
-from sifr.span import Minute, Year, Month, Day, Hour, get_time_spans
+from sifr.span import Minute, Year, Month, Day, Hour, get_time_spans, Forever
 
 
 class SpanTests(unittest.TestCase):
@@ -40,6 +40,12 @@ class SpanTests(unittest.TestCase):
             span = Year(now, ["single"])
             self.assertEqual(span.key, "single:2012")
             self.assertEqual(span.expiry, None)
+
+    def test_forever(self):
+        now = datetime.datetime.now()
+        span = Forever(now, ["single"])
+        self.assertEqual(span.key, "single:I")
+        self.assertEqual(span.expiry, None)
 
     def test_explicit_expiry(self):
         now = datetime.datetime.now()

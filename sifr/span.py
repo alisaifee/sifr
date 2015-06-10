@@ -12,7 +12,7 @@ except ImportError:
 @total_ordering
 class Span(object):
     def __init__(self, at, keys, expiry=None):
-        if not expiry:
+        if not expiry and not isinstance(self, Forever):
             next = SPAN_ORDER.index(self.__class__) + 1
             if next < len(SPAN_ORDER):
                 self.expiry = time.mktime(
@@ -143,6 +143,9 @@ class Year(Span):
                                   minute=59,
                                   second=59))
 
+class Forever(Span):
+    fmt = "I"
+    duration = -1
 
 ALL_SPANS = [Year, Month, Day, Hour, Minute]
 SPAN_ORDER = [Minute, Hour, Day, Month, Year]

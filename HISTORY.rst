@@ -1,5 +1,3 @@
-.. :changelog:
-
-Changelog
----------
-
+0.0.1 2015-06-10
+================
+* First Release

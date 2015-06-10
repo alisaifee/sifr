@@ -1,4 +1,5 @@
 -r main.txt
+-r daemon.txt
 nose
 mock
 coverage

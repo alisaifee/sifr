@@ -33,13 +33,6 @@ def cli(ctx):
     ctx.obj = SifrD()
 
 
-@click.option("--config", type=AnyConfigType(), required=True)
-@click.pass_obj
-def web_server(sifrd, config):
-    app = create_application(config)
-    app.run(host="0.0.0.0")
-
-
 @cli.command()
 @click.option("--config", type=AnyConfigType(), required=True)
 @click.pass_obj

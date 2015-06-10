@@ -31,16 +31,16 @@ class MsgpackServerTests(unittest.TestCase):
         cli.incr("foo", 1)
         self.assertEqual(
             1,
-            storage.count(Hour(datetime.datetime.now(), "foo"))
+            storage.count(Hour(datetime.datetime.now(), ["foo"]))
         )
         cli.incr("bar", 1, ["minute"])
         self.assertEqual(
             0,
-            storage.count(Hour(datetime.datetime.now(), "bar"))
+            storage.count(Hour(datetime.datetime.now(), ["bar"]))
         )
         self.assertEqual(
             1,
-            storage.count(Minute(datetime.datetime.now(), "bar"))
+            storage.count(Minute(datetime.datetime.now(), ["bar"]))
         )
         self.assertEqual(
             1,
@@ -49,7 +49,7 @@ class MsgpackServerTests(unittest.TestCase):
         cli.incr_unique("foo", "test")
         self.assertEqual(
             1,
-            storage.cardinality(Hour(datetime.datetime.now(), "foo"))
+            storage.cardinality(Hour(datetime.datetime.now(), ["foo"]))
         )
         self.assertEqual(
             1,
@@ -58,7 +58,7 @@ class MsgpackServerTests(unittest.TestCase):
         cli.track("foo", "test")
         self.assertEqual(
             set(["test"]),
-            storage.uniques(Hour(datetime.datetime.now(), "foo"))
+            storage.uniques(Hour(datetime.datetime.now(), ["foo"]))
         )
         self.assertEqual(
             set(["test"]),

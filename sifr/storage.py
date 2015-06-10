@@ -205,13 +205,18 @@ class RedisStorage(Storage):
         return int(value) if value is not None else 0
 
 
-
 class RiakStorage(Storage):
     def __init__(self, riak):
         self.riak = riak
-        self.counter_bucket = self.riak.bucket_type("maps").bucket("sifr_counter")
-        self.unique_counters_bucket = self.riak.bucket_type("maps").bucket("sifr_unique_counter")
-        self.uniques_bucket = self.riak.bucket_type("maps").bucket("sifr_uniques")
+        self.counter_bucket = self.riak.bucket_type(
+            "maps"
+        ).bucket("sifr_counter")
+        self.unique_counters_bucket = self.riak.bucket_type(
+            "maps"
+        ).bucket("sifr_unique_counter")
+        self.uniques_bucket = self.riak.bucket_type(
+            "maps"
+        ).bucket("sifr_uniques")
 
     def count(self, span):
         map = self.counter_bucket.get(span.namespace)
@@ -224,11 +229,18 @@ class RiakStorage(Storage):
         counter.increment()
         map.store()
 
+    def get_maps(self, bucket, spans, create=False):
+        maps = {}
+        namespaces = set(span.namespace for span in spans)
+        for namespace in namespaces:
+            if create:
+                maps[namespace] = bucket.new(namespace)
+            else:
+                maps[namespace] = bucket.get(namespace)
+        return maps
+
     def track_multi(self, spans, identifier):
-        maps = {
-            namespace:self.uniques_bucket.new(namespace)
-            for namespace in set(span.namespace for span in spans)
-            }
+        maps = self.get_maps(self.uniques_bucket, spans, True)
         for span in spans:
             riak_set = maps[span.namespace].sets.get(span.timestamp)
             riak_set.add(str(identifier))
@@ -236,10 +248,7 @@ class RiakStorage(Storage):
             map.store()
 
     def incr_unique_multi(self, spans, identifier):
-        maps = {
-            namespace:self.unique_counters_bucket.new(namespace)
-            for namespace in set(span.namespace for span in spans)
-        }
+        maps = self.get_maps(self.unique_counters_bucket, spans, True)
         for span in spans:
             counter = maps[span.namespace].sets.get(span.timestamp)
             counter.add(str(identifier))
@@ -259,10 +268,7 @@ class RiakStorage(Storage):
         map.store()
 
     def incr_multi(self, spans, amount=1):
-        maps = {
-            namespace:self.counter_bucket.new(namespace)
-            for namespace in set(span.namespace for span in spans)
-            }
+        maps = self.get_maps(self.counter_bucket, spans, True)
         for span in spans:
             counter = maps[span.namespace].counters.get(span.timestamp)
             counter.increment(amount)

@@ -19,25 +19,25 @@ class RPCClient(object):
 
     def incr_unique(self, key, identity, resolutions=None):
         self.client.call(
-                'incr_unique', key,
-                resolutions or self.resolutions, identity
-            )
+            'incr_unique', key,
+            resolutions or self.resolutions, identity
+        )
 
     def track(self, key, identity, resolutions=None):
         self.client.call(
-                'track', key,
-                resolutions or self.resolutions, identity
-            )
+            'track', key,
+            resolutions or self.resolutions, identity
+        )
 
     def count(self, key, at, resolution):
         return self.client.call(
-                'count', key, time.mktime(at.timetuple()), resolution
-            )
+            'count', key, time.mktime(at.timetuple()), resolution
+        )
 
     def cardinality(self, key, at, resolution):
         return self.client.call(
-                'cardinality', key, time.mktime(at.timetuple()), resolution
-            )
+            'cardinality', key, time.mktime(at.timetuple()), resolution
+        )
 
     def uniques(self, key, at, resolution):
         return set(

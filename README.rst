@@ -16,7 +16,8 @@ sifr
 
 .. image:: http://i.imgur.com/luJUJ31.png
 
-Count things in various time based windows using redis
+Count things in various time based windows using in-memory, redis or riak
+storage.
 
 Example
 -------
@@ -24,13 +25,20 @@ Example
 .. code-block:: python
 
         import datetime
-        import redis
+        import redis, riak
 
         from sifr.span import Year, Month, Day, Hour, Minute, get_time_spans
-        from sifr.storage import RedisStorage
+        from sifr.storage import MemoryStorage, RedisStorage, RiakStorage
 
-        client = redis.Redis()
-        storage = RedisStorage(client)
+        redis_client = redis.Redis()
+        redis_store = RedisStorage(redis_client)
+
+        riak_client = riak.RiakClient()
+        riak_store = RiakStorage(riak_client)
+
+        memory_store = MemoryStorage()
+
+        stores = [memory_store, redis_store, riak_store]
 
         now = datetime.datetime.now()
         user_id = 1
@@ -42,18 +50,21 @@ Example
             for span in [Year, Month, Day, Hour, Minute]
         ]
         # incr a counter for all resolutions
-        storage.incr_multi(spans)
+        [store.incr_multi(spans) for store in stores]
 
         # incr a unique counter
-        storage.incr_unique_multi(spans, page)
+        [store.incr_unique_multi(spans, page) for store in stores]
+        [store.incr_unique_multi(spans, page) for store in stores]
 
         # track the page view
-        storage.track_multi(spans, page)
+        [store.track_multi(spans, page) for store in stores]
+        [store.track_multi(spans, page) for store in stores]
 
         # get the counts/uniques for a single year window
-        assert 1 == storage.count(Year(now, ["views", "user", 1]))
-        assert 1 == storage.cardinality(Year(now, ["views", "user", 1]))
-        assert set(["index.html"]) == storage.uniques(Year(now, ["views", "user", 1]))
+        for store in stores:
+          assert 1 == store.count(Year(now, ["views", "user", 1]))
+          assert 1 == store.cardinality(Year(now, ["views", "user", 1]))
+          assert set(["index.html"]) == store.uniques(Year(now, ["views", "user", 1]))
 
 
         # get the counts/uniques for a range
@@ -61,9 +72,10 @@ Example
         end = now + datetime.timedelta(minutes=1)
 
         span_range = get_time_spans(start, end, ["views", "user", 1], [Minute])
-        assert [1] == [storage.count(span) for span in span_range]
-        assert [1] == [storage.cardinality(span) for span in span_range]
-        assert [set(["index.html"])] == [storage.uniques(span) for span in span_range]
+        for store in stores:
+          assert [1] == [store.count(span) for span in span_range]
+          assert [1] == [store.cardinality(span) for span in span_range]
+          assert [set(["index.html"])] == [store.uniques(span) for span in span_range]
 
 
 References

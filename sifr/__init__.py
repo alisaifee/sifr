@@ -10,7 +10,9 @@ del get_versions
 class RPCClient(object):
     def __init__(self, host, port, resolutions=None):
         import msgpackrpc
-        self.client = msgpackrpc.Client(msgpackrpc.Address(host, port))
+        self.client = msgpackrpc.Client(
+            msgpackrpc.Address(host, port), unpack_encoding='utf-8'
+        )
         self.resolutions = resolutions or ["year", "month",
                                            "day", "hour", "minute"]
 

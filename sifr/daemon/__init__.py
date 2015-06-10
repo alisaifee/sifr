@@ -45,7 +45,8 @@ def msgpack_server(sifrd, config):
     storage = RedisStorage(redis_instance)
 
     server = msgpackrpc.Server(
-        SifrServer(storage)
+        SifrServer(storage),
+        unpack_encoding='utf-8'
     )
     server.listen(
         (config.get("HOST", "127.0.0.1"), int(config.get("PORT", 6000)))

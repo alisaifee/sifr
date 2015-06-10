@@ -20,7 +20,7 @@ class MsgpackServerTests(unittest.TestCase):
 
     def test_client_server_full_flow(self):
         storage = MemoryStorage()
-        self.server = msgpackrpc.Server(SifrServer(storage))
+        self.server = msgpackrpc.Server(SifrServer(storage), unpack_encoding='utf-8')
         port = get_free_port()
         self.server.listen(msgpackrpc.Address('127.0.0.1', port))
         self.server_thread = threading.Thread(target=self.run_server)

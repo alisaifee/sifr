@@ -41,7 +41,7 @@ setup(
     author=__author__,
     author_email=__email__,
     license="MIT",
-    url="https://sifr.readthedocs.org",
+    url="https://github.com/alisaifee/sifr",
     zip_safe=False,
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),

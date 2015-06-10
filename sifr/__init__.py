@@ -2,7 +2,6 @@
 """
 import time
 from ._version import get_versions
-from sifr.span import ALL_SPANS
 
 __version__ = get_versions()['version']
 del get_versions

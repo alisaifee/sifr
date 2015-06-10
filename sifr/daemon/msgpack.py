@@ -5,7 +5,7 @@ from sifr.util import normalize_time
 
 
 def span_from_resolution(resolution):
-    return  {
+    return {
         "minute": Minute,
         "hour": Hour,
         "day": Day,
@@ -34,8 +34,8 @@ class SifrServer(RPCServer):
     def track(self, key, resolutions, identifier):
         now = datetime.datetime.now()
         self.storage.track_multi([
-           span_from_resolution(res)(now, key) for res in resolutions
-           ], identifier)
+            span_from_resolution(res)(now, key) for res in resolutions
+            ], identifier)
 
     def count(self, key, at, resolution):
         return self.storage.count(

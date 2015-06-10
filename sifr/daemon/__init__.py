@@ -1,9 +1,8 @@
 import anyconfig
 import click
 import msgpackrpc
-import redis
 from sifr.daemon.msgpack import SifrServer
-from sifr.storage import RedisStorage
+from sifr.storage import RedisStorage, RiakStorage, MemoryStorage
 
 
 class SifrD(object):
@@ -29,27 +28,40 @@ class AnyConfigType(click.File):
 
 
 @click.group()
-@click.option('--debug/--no-debug', default=False)
 @click.pass_context
-def cli(ctx, debug):
-    ctx.obj = SifrD(debug)
+def cli(ctx):
+    ctx.obj = SifrD()
+
+
+@click.option("--config", type=AnyConfigType(), required=True)
+@click.pass_obj
+def web_server(sifrd, config):
+    app = create_application(config)
+    app.run(host="0.0.0.0")
 
 
 @cli.command()
 @click.option("--config", type=AnyConfigType(), required=True)
 @click.pass_obj
 def msgpack_server(sifrd, config):
-    if not config.get("REDIS_URL"):
-        raise SystemExit("REDIS_URL is a required configuration")
-    redis_instance = redis.from_url(config.get("REDIS_URL"))
-    storage = RedisStorage(redis_instance)
-
+    storage_type = config.get("storage")
+    if storage_type == "riak":
+        import riak
+        riak_nodes = config.get("riak_nodes")
+        riak_instance = riak.RiakClient(nodes=riak_nodes)
+        storage = RiakStorage(riak_instance)
+    elif storage_type == "redis":
+        import redis
+        redis_instance = redis.from_url(config.get("redis_url"))
+        storage = RedisStorage(redis_instance)
+    else:
+        storage = MemoryStorage()
     server = msgpackrpc.Server(
         SifrServer(storage),
         unpack_encoding='utf-8'
     )
     server.listen(
-        (config.get("HOST", "127.0.0.1"), int(config.get("PORT", 6000)))
+        msgpackrpc.Address(config.get("host", "127.0.0.1"), int(config.get("port", 6000)))
     )
     server.start()
 

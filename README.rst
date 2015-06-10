@@ -19,9 +19,30 @@ sifr
 Count things in various time based windows using in-memory, redis or riak
 storage.
 
-Example
--------
+Installation
+============
+Install the basic package::
 
+    pip install sifr
+
+Install **sifr** with redis dependencies::
+
+    pip install 'sifr[redis]'
+
+Install **sifr** with riak dependencies::
+
+    pip install 'sifr[riak]'
+
+
+Install **sifr** with sifrd service dependencies::
+
+    pip install 'sifr[daemon]'
+
+Examples
+========
+
+Using **sifr** with direct storage
+----------------------------------
 .. code-block:: python
 
         import datetime
@@ -78,7 +99,53 @@ Example
           assert [set(["index.html"])] == [store.uniques(span) for span in span_range]
 
 
+Using **sifr** via rpc
+----------------------
+
+sifr.yml (using a redis backend)
+
+.. code-block:: yaml
+
+    storage: redis
+    redis_url: redis://localhost:6379/1
+    host: localhost
+    port: 6000
+
+sifr.yml (using a riak backend)
+
+.. code-block:: yaml
+
+    storage: riak
+    riak_nodes:
+        - host: localhost
+        - pb_port: 8087
+    host: localhost
+    port: 6000
+
+Run the server
+
+.. code-block:: bash
+
+    sifrd msgpack_server --config=sifr.yml
+
+
+Interact with the server
+
+.. code-block:: python
+
+    from sifr import RPCClient
+    client = RPCCient(host='localhost', port=6000, resolutions=["year", "month", "day"])
+    client.incr("views:user:1")
+    client.incr_unique("views:user:1", "index.html")
+    client.incr_unique("views:user:1", "index.html")
+    client.track("views:user:1", "index.html")
+    client.track("views:user:1", "index.html")
+
+    assert 1 == client.count("views:user:1", datetime.datetime.now(), "day")
+    assert 1 == client.cardinality("views:user:1", datetime.datetime.now(), "day")
+    assert set(["index.html"]) == client.uniques("views:user:1", datetime.datetime.now(), "day")
+
 References
-----------
+==========
 * `Minuteman <http://elcuervo.github.io/minuteman/>`_
 

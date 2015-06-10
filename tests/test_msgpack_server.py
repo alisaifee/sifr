@@ -13,7 +13,7 @@ class MsgpackServerTests(unittest.TestCase):
     def setUp(self):
         self.stream_server = None
 
-    def test_stream(self):
+    def test_client_server_full_flow(self):
         storage = MemoryStorage()
         server = SifrServer(storage)
         self.stream_server = StreamServer(('127.0.0.1', get_free_port()),
@@ -55,15 +55,6 @@ class MsgpackServerTests(unittest.TestCase):
         self.assertEqual(
             set(["test"]),
             cli.uniques("foo", datetime.datetime.now(), "hour")
-        )
-
-    def test_incr(self):
-        storage = MemoryStorage()
-        server = SifrServer(storage)
-        server.incr("test", ["hour"], 1)
-        self.assertEqual(
-            1,
-            storage.count(Hour(datetime.datetime.now(), "test"))
         )
 
     def tearDown(self):

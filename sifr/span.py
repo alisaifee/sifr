@@ -35,6 +35,14 @@ class Span(object):
                                      time=self.at.strftime(self.fmt))
 
     @property
+    def namespace(self):
+        return self._key
+
+    @property
+    def timestamp(self):
+        return self.at.strftime(self.fmt)
+
+    @property
     def next(self):
         n = self.__class__(self.range[1] + datetime.timedelta(seconds=1), [])
         n._key = self._key

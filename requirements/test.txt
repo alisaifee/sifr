@@ -1,5 +1,7 @@
 -r main.txt
 -r daemon.txt
+-r redis.txt
+-r riak.txt
 nose
 mock
 coverage

@@ -23,11 +23,11 @@ class Storage(object):
         raise NotImplementedError
 
     @abstractmethod
-    def incr_unique(self, span, identifier, amount=1):
+    def incr_unique(self, span, identifier):
         raise NotImplementedError
 
     @abstractmethod
-    def incr_unique_multi(self, spans, identifier, amount=1):
+    def incr_unique_multi(self, spans, identifier):
         raise NotImplementedError
 
     @abstractmethod
@@ -127,7 +127,7 @@ class MemoryStorage(Storage):
             self.expirations[span.key] = span.expiry
         self.unique_counter.add(span.key, identifier)
 
-    def incr_unique_multi(self, spans, identifier, amount=1):
+    def incr_unique_multi(self, spans, identifier):
         for span in spans:
             self.incr_unique(span, identifier)
 
@@ -161,14 +161,14 @@ class RedisStorage(Storage):
         value = self.redis.get(span.key + ":c")
         return int(value) if value is not None else 0
 
-    def incr_unique(self, span, identifier, amount=1):
+    def incr_unique(self, span, identifier):
         with self.redis.pipeline() as pipeline:
             pipeline.pfadd(span.key + ":u", identifier)
             pipeline.expire(span.key + ":u",
                             int(span.expiry) - int(time.time()))
             pipeline.execute()
 
-    def incr_unique_multi(self, spans, identifier, amount=1):
+    def incr_unique_multi(self, spans, identifier):
         with self.redis.pipeline() as pipeline:
             for span in spans:
                 pipeline.pfadd(span.key + ":u", identifier)
@@ -203,3 +203,78 @@ class RedisStorage(Storage):
     def cardinality(self, span):
         value = self.redis.pfcount(span.key + ":u")
         return int(value) if value is not None else 0
+
+
+
+class RiakStorage(Storage):
+    def __init__(self, riak):
+        self.riak = riak
+        self.counter_bucket = self.riak.bucket_type("maps").bucket("sifr_counter")
+        self.unique_counters_bucket = self.riak.bucket_type("maps").bucket("sifr_unique_counter")
+        self.uniques_bucket = self.riak.bucket_type("maps").bucket("sifr_uniques")
+
+    def count(self, span):
+        map = self.counter_bucket.get(span.namespace)
+        counter = map.counters.get(span.timestamp)
+        return counter.value
+
+    def incr(self, span, amount=1):
+        map = self.counter_bucket.new(span.namespace)
+        counter = map.counters.get(span.timestamp)
+        counter.increment()
+        map.store()
+
+    def track_multi(self, spans, identifier):
+        maps = {
+            namespace:self.uniques_bucket.new(namespace)
+            for namespace in set(span.namespace for span in spans)
+            }
+        for span in spans:
+            riak_set = maps[span.namespace].sets.get(span.timestamp)
+            riak_set.add(str(identifier))
+        for map in maps.values():
+            map.store()
+
+    def incr_unique_multi(self, spans, identifier):
+        maps = {
+            namespace:self.unique_counters_bucket.new(namespace)
+            for namespace in set(span.namespace for span in spans)
+        }
+        for span in spans:
+            counter = maps[span.namespace].sets.get(span.timestamp)
+            counter.add(str(identifier))
+        for map in maps.values():
+            map.store()
+
+    def track(self, span, identifier):
+        map = self.uniques_bucket.new(span.namespace)
+        riak_set = map.sets.get(span.timestamp)
+        riak_set.add(str(identifier))
+        map.store()
+
+    def incr_unique(self, span, identifier):
+        map = self.unique_counters_bucket.new(span.namespace)
+        riak_set = map.sets.get(span.timestamp)
+        riak_set.add(str(identifier))
+        map.store()
+
+    def incr_multi(self, spans, amount=1):
+        maps = {
+            namespace:self.counter_bucket.new(namespace)
+            for namespace in set(span.namespace for span in spans)
+            }
+        for span in spans:
+            counter = maps[span.namespace].counters.get(span.timestamp)
+            counter.increment(amount)
+        for map in maps.values():
+            map.store()
+
+    def cardinality(self, span):
+        map = self.unique_counters_bucket.get(span.namespace)
+        riak_set = map.sets.get(span.timestamp)
+        return len(riak_set)
+
+    def uniques(self, span):
+        map = self.uniques_bucket.get(span.namespace)
+        riak_set = map.sets.get(span.timestamp)
+        return riak_set.value

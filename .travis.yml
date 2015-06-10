@@ -11,6 +11,7 @@ install:
     
 services:
     - redis-server
+    - riak
 
 script: 
     - nosetests tests --with-cov -v

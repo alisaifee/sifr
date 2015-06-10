@@ -9,19 +9,27 @@ __copyright__ = "Copyright 2015, Ali-Akber Saifee"
 
 from setuptools import setup, find_packages
 import os, re
-
-this_dir = os.path.abspath(os.path.dirname(__file__))
-egg = re.compile("\#egg\=(.*?)$")
-requirements = filter(None, open(
-    os.path.join(this_dir, 'requirements', 'main.txt')).read().splitlines())
-daemon_requirements = filter(None, open(
-    os.path.join(this_dir, 'requirements', 'daemon.txt')).read().splitlines())
-REQUIREMENTS = [req for req in requirements if not req.startswith('-e')]
-DEPENDENCY_LINKS = [req.replace('-e ','') for req in requirements if req.startswith('-e')]
-REQUIREMENTS.extend([egg.findall(req)[0] for req in requirements if req.startswith('-e')])
-DAEMON_REQUIREMENTS = [req for req in daemon_requirements if not req.startswith('-e')]
-
 import versioneer
+
+THIS_DIR = os.path.abspath(os.path.dirname(__file__))
+def requirements_from_file(name):
+    return [
+        k for k in
+        open(os.path.join(THIS_DIR, 'requirements', name))
+        if k.strip()
+    ]
+
+EGG = re.compile("\#egg\=(.*?)$")
+FULL_REQUIREMENTS = requirements_from_file('main.txt')
+
+REQUIREMENTS = [req for req in FULL_REQUIREMENTS if not req.startswith('-e')]
+DEPENDENCY_LINKS = [req.replace('-e ','') for req in FULL_REQUIREMENTS if req.startswith('-e')]
+REQUIREMENTS.extend([EGG.findall(req)[0] for req in FULL_REQUIREMENTS if req.startswith('-e')])
+DAEMON_REQUIREMENTS = requirements_from_file('daemon.txt')
+REDIS_REQUIREMENTS = requirements_from_file('redis.txt')
+RIAK_REQUIREMENTS = requirements_from_file('riak.txt')
+
+ALL_REQUIREMENTS = REQUIREMENTS + DAEMON_REQUIREMENTS + REDIS_REQUIREMENTS + RIAK_REQUIREMENTS
 
 versioneer.versionfile_source = "sifr/_version.py"
 versioneer.versionfile_build = "sifr/version.py"
@@ -39,7 +47,10 @@ setup(
     cmdclass=versioneer.get_cmdclass(),
     install_requires=REQUIREMENTS,
     extras_require={
-        'daemon': DAEMON_REQUIREMENTS
+        'daemon': DAEMON_REQUIREMENTS,
+        'redis': REDIS_REQUIREMENTS,
+        'riak': RIAK_REQUIREMENTS,
+        'all': ALL_REQUIREMENTS
     },
     dependency_links=DEPENDENCY_LINKS,
     classifiers=[k for k in open('CLASSIFIERS').read().split('\n') if k],

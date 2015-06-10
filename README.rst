@@ -9,9 +9,16 @@
 .. |landscape| image:: https://landscape.io/github/alisaifee/sifr/master/landscape.svg?style=flat-square
     :target: https://landscape.io/github/alisaifee/sifr/master
 
-*************
+****
 sifr
-*************
+****
+
+
+   ... and with the sign 0 ... any number may be written
+
+   -- Fibionacci
+
+
 |travis-ci| |coveralls| |landscape| |pypi| |license|
 
 .. image:: http://i.imgur.com/luJUJ31.png
@@ -148,4 +155,4 @@ Interact with the server
 References
 ==========
 * `Minuteman <http://elcuervo.github.io/minuteman/>`_
-
+* `Zero <http://en.wikipedia.org/wiki/0_%28number%29>`_

@@ -1,5 +1,4 @@
 import datetime
-from mprpc import RPCServer
 from sifr.span import Day, Minute, Hour, Year, Month
 from sifr.util import normalize_time
 
@@ -14,10 +13,9 @@ def span_from_resolution(resolution):
     }.get(resolution)
 
 
-class SifrServer(RPCServer):
+class SifrServer(object):
     def __init__(self, storage):
         self.storage = storage
-        super(SifrServer, self).__init__()
 
     def incr(self, key, resolutions, amount):
         now = datetime.datetime.now()

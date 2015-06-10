@@ -1,6 +1,8 @@
+import threading
 import unittest
 import datetime
-from gevent.server import StreamServer
+import time
+import msgpackrpc
 from sifr import RPCClient
 
 from sifr.daemon import SifrServer
@@ -11,15 +13,21 @@ from tests import get_free_port
 
 class MsgpackServerTests(unittest.TestCase):
     def setUp(self):
-        self.stream_server = None
+        self.server = None
+
+    def run_server(self):
+        self.server.start()
 
     def test_client_server_full_flow(self):
         storage = MemoryStorage()
-        server = SifrServer(storage)
-        self.stream_server = StreamServer(('127.0.0.1', get_free_port()),
-                                          server)
-        self.stream_server.start()
-        cli = RPCClient('127.0.0.1', self.stream_server.server_port)
+        self.server = msgpackrpc.Server(SifrServer(storage))
+        port = get_free_port()
+        self.server.listen(msgpackrpc.Address('127.0.0.1', port))
+        self.server_thread = threading.Thread(target=self.run_server)
+        self.server_thread.start()
+        time.sleep(0.1)
+
+        cli = RPCClient('127.0.0.1', port)
         cli.incr("foo", 1)
         self.assertEqual(
             1,
@@ -58,5 +66,7 @@ class MsgpackServerTests(unittest.TestCase):
         )
 
     def tearDown(self):
-        if self.stream_server:
-            self.stream_server.stop()
+        if self.server:
+            self.server.stop()
+            self.server_thread.join()
+

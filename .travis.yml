@@ -8,12 +8,13 @@ python:
 
 install:
     - pip install -r requirements/ci.txt --use-mirrors
-    
+
 services:
     - redis-server
     - riak
 
-script: 
+before_script: ./scripts/setup_riak_buckets.sh
+script:
     - nosetests tests --with-cov -v
     - flake8 sifr --max-complexity=10
 after_success:

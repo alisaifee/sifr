@@ -1,6 +1,6 @@
 import anyconfig
 import click
-from gevent.server import StreamServer
+import msgpackrpc
 import redis
 from sifr.daemon.msgpack import SifrServer
 from sifr.storage import RedisStorage
@@ -44,11 +44,13 @@ def msgpack_server(sifrd, config):
     redis_instance = redis.from_url(config.get("REDIS_URL"))
     storage = RedisStorage(redis_instance)
 
-    server = StreamServer(
-        (config.get("HOST", "127.0.0.1"), int(config.get("PORT", 6000))),
+    server = msgpackrpc.Server(
         SifrServer(storage)
     )
-    server.serve_forever()
+    server.listen(
+        (config.get("HOST", "127.0.0.1"), int(config.get("PORT", 6000)))
+    )
+    server.start()
 
 
 def run():

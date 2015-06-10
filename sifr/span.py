@@ -143,6 +143,7 @@ class Year(Span):
                                   minute=59,
                                   second=59))
 
+
 class Forever(Span):
     fmt = "I"
     duration = -1

@@ -61,7 +61,9 @@ def msgpack_server(sifrd, config):
         unpack_encoding='utf-8'
     )
     server.listen(
-        msgpackrpc.Address(config.get("host", "127.0.0.1"), int(config.get("port", 6000)))
+        msgpackrpc.Address(
+            config.get("host", "127.0.0.1"), int(config.get("port", 6000))
+        )
     )
     server.start()
 

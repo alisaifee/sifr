@@ -137,14 +137,14 @@ class RedisStorage(Storage):
         self.redis = redis
 
     def track(self, span, identifier):
-        with self.redis.pipeline() as pipeline:
+        with self.redis.pipeline(transaction=False) as pipeline:
             pipeline.sadd(span.key + ":t", identifier)
             pipeline.expire(span.key + ":t",
                             int(span.expiry) - int(time.time()))
             pipeline.execute()
 
     def track_multi(self, spans, identifier):
-        with self.redis.pipeline() as pipeline:
+        with self.redis.pipeline(transaction=False) as pipeline:
             for span in spans:
                 pipeline.sadd(span.key + ":t", identifier)
                 if span.expiry is not None:
@@ -162,14 +162,14 @@ class RedisStorage(Storage):
         return int(value) if value is not None else 0
 
     def incr_unique(self, span, identifier):
-        with self.redis.pipeline() as pipeline:
+        with self.redis.pipeline(transaction=False) as pipeline:
             pipeline.pfadd(span.key + ":u", identifier)
             pipeline.expire(span.key + ":u",
                             int(span.expiry) - int(time.time()))
             pipeline.execute()
 
     def incr_unique_multi(self, spans, identifier):
-        with self.redis.pipeline() as pipeline:
+        with self.redis.pipeline(transaction=False) as pipeline:
             for span in spans:
                 pipeline.pfadd(span.key + ":u", identifier)
                 if span.expiry is not None:
@@ -180,7 +180,7 @@ class RedisStorage(Storage):
             pipeline.execute()
 
     def incr(self, span, amount=1):
-        with self.redis.pipeline() as pipeline:
+        with self.redis.pipeline(transaction=False) as pipeline:
             pipeline.incr(span.key + ":c")
             if span.expiry is not None:
                 pipeline.expire(
@@ -190,7 +190,7 @@ class RedisStorage(Storage):
             pipeline.execute()
 
     def incr_multi(self, spans, amount=1):
-        with self.redis.pipeline() as pipeline:
+        with self.redis.pipeline(transaction=False) as pipeline:
             for span in spans:
                 pipeline.incr(span.key + ":c")
                 if span.expiry is not None:
